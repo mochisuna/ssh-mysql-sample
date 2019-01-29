@@ -3,9 +3,9 @@ package infra
 import (
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/mochisuna/ssh-mysql-sample/domain"
 	"github.com/mochisuna/ssh-mysql-sample/infra/mysql"
-	sq "gopkg.in/Masterminds/squirrel.v1"
 )
 
 const (
