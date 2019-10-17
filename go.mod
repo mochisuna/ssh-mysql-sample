@@ -7,3 +7,5 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20181213162136-af1d9380204a
 	golang.org/x/crypto v0.0.0-20190128193316-c7b33c32a30b
 )
+
+go 1.13

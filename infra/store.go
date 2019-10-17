@@ -1,10 +1,9 @@
 package infra
 
 import (
-	"time"
-
 	sq "github.com/Masterminds/squirrel"
 	"github.com/mochisuna/ssh-mysql-sample/domain"
+	"github.com/mochisuna/ssh-mysql-sample/domain/repository"
 	"github.com/mochisuna/ssh-mysql-sample/infra/mysql"
 )
 
@@ -12,15 +11,6 @@ const (
 	// Table
 	storeTable = "stores"
 )
-
-type storeColumns struct {
-	ID        domain.StoreID `db:"id"`
-	UID       string         `db:"uid"`
-	Name      string         `db:"name"`
-	Status    int            `db:"status"`
-	CreatedAt time.Time      `db:"created_at"`
-	UpdatedAt time.Time      `db:"updated_at"`
-}
 
 type storeRepository struct {
 	DBClient *mysql.Client
@@ -32,7 +22,7 @@ func NewStoreRepository(dbClient *mysql.Client) *storeRepository {
 	}
 }
 
-func (r *storeRepository) Get(storeID domain.StoreID) (domain.Store, error) {
+func (r *storeRepository) Get(storeID domain.StoreID) (repository.Store, error) {
 	columns := []string{
 		"id",
 		"uid",
@@ -41,8 +31,7 @@ func (r *storeRepository) Get(storeID domain.StoreID) (domain.Store, error) {
 		"created_at",
 		"updated_at",
 	}
-	ret := domain.Store{}
-	var store storeColumns
+	ret := repository.Store{}
 	err := sq.Select(columns...).
 		From("stores").
 		Where(sq.Eq{
@@ -51,28 +40,21 @@ func (r *storeRepository) Get(storeID domain.StoreID) (domain.Store, error) {
 		RunWith(r.DBClient.DB).
 		QueryRow().
 		Scan(
-			&store.ID,
-			&store.UID,
-			&store.Name,
-			&store.Status,
-			&store.CreatedAt,
-			&store.UpdatedAt,
+			&ret.ID,
+			&ret.UID,
+			&ret.Name,
+			&ret.Status,
+			&ret.CreatedAt,
+			&ret.UpdatedAt,
 		)
 	if err != nil {
 		return ret, err
 	}
-	ret = domain.Store{
-		ID:        store.ID,
-		UID:       store.UID,
-		Name:      store.Name,
-		Status:    store.Status,
-		CreatedAt: store.CreatedAt,
-		UpdatedAt: store.UpdatedAt,
-	}
+
 	return ret, err
 }
 
-func (r *storeRepository) GetList() ([]domain.Store, error) {
+func (r *storeRepository) GetList() ([]repository.Store, error) {
 	columns := []string{
 		"id",
 		"uid",
@@ -81,7 +63,7 @@ func (r *storeRepository) GetList() ([]domain.Store, error) {
 		"created_at",
 		"updated_at",
 	}
-	ret := []domain.Store{}
+	ret := []repository.Store{}
 	rows, err := sq.Select(columns...).
 		From("stores").
 		RunWith(r.DBClient.DB).
@@ -90,7 +72,7 @@ func (r *storeRepository) GetList() ([]domain.Store, error) {
 		return nil, err
 	}
 	for rows.Next() {
-		var store storeColumns
+		var store repository.Store
 		err = rows.Scan(
 			&store.ID,
 			&store.UID,
@@ -102,14 +84,7 @@ func (r *storeRepository) GetList() ([]domain.Store, error) {
 		if err != nil {
 			return nil, err
 		}
-		ret = append(ret, domain.Store{
-			ID:        store.ID,
-			UID:       store.UID,
-			Name:      store.Name,
-			Status:    store.Status,
-			CreatedAt: store.CreatedAt,
-			UpdatedAt: store.UpdatedAt,
-		})
+		ret = append(ret, store)
 	}
 	return ret, err
 }
