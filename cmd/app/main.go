@@ -2,8 +2,8 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"os"
 
 	"github.com/mochisuna/ssh-mysql-sample/application"
 	"github.com/mochisuna/ssh-mysql-sample/config"
@@ -12,17 +12,12 @@ import (
 	"github.com/mochisuna/ssh-mysql-sample/infra"
 	"github.com/mochisuna/ssh-mysql-sample/infra/mysql"
 	"github.com/mochisuna/ssh-mysql-sample/infra/ssh"
+	"github.com/urfave/cli/v2"
 )
 
-func main() {
-	// parse runtime options
-	env := flag.String("e", "dev", "parameter of environment. default value: dev")
-	storeID := flag.Int("s", 1, "parameter of store id. default value: 1")
-	flag.Parse()
-
+func initClient(env string) (*ssh.Client, *mysql.Client) {
 	// setting file path
-	confPath := fmt.Sprintf("./_tools/config/%s/conf.toml", *env)
-	outPath := fmt.Sprintf("./_tools/output/%s.csv", *env)
+	confPath := fmt.Sprintf("./_tools/config/%s/conf.toml", env)
 
 	// Setting Config
 	conf := &config.Config{}
@@ -34,8 +29,6 @@ func main() {
 	sshClient, err := ssh.New(&conf.SSH)
 	if err != nil {
 		fmt.Println("err in new ssh client. reason : " + err.Error())
-	} else {
-		defer sshClient.Close()
 	}
 
 	// init db client
@@ -44,15 +37,28 @@ func main() {
 		fmt.Printf("erro in new db client. reason : %v\n", err)
 		panic(err)
 	}
-	defer dbClient.Close()
+	return sshClient, dbClient
 
+}
+
+func initHandler(dbClient *mysql.Client) *handler.Handler {
 	// init service
 	storeRepo := infra.NewStoreRepository(dbClient)
 	storeService := application.NewStoreService(storeRepo)
 	services := &handler.Services{
 		StoreService: storeService,
 	}
-	serviceHandler := handler.New(services)
+	return handler.New(services)
+}
+
+func act(c *cli.Context) error {
+	env := c.String("e")
+	storeID := c.Int("s")
+	outPath := fmt.Sprintf("./_tools/output/%s.csv", env)
+	sshClient, dbClient := initClient(env)
+	defer sshClient.Close()
+	defer dbClient.Close()
+	serviceHandler := initHandler(dbClient)
 
 	// handler action sample
 	// sample A: save as csv file
@@ -61,7 +67,7 @@ func main() {
 	}
 
 	// sample B: get single store data
-	val, err := serviceHandler.GetStore(domain.StoreID(*storeID))
+	val, err := serviceHandler.GetStore(domain.StoreID(storeID))
 	if err != nil {
 		fmt.Printf("err: %v", err)
 	}
@@ -73,4 +79,28 @@ func main() {
 		fmt.Printf("err: %v", err)
 	}
 	fmt.Println(vals)
+	return nil
+}
+
+func main() {
+	en := cli.StringFlag{
+		Name:    "env",
+		Aliases: []string{"e"},
+		Value:   "dev",
+		Usage:   "parameter of environment. default value: dev",
+	}
+	si := cli.IntFlag{
+		Name:    "store_id",
+		Aliases: []string{"s", "sid"},
+		Value:   1,
+		Usage:   "parameter of store id. default value: 1",
+	}
+	app := &cli.App{
+		Flags: []cli.Flag{
+			&si,
+			&en,
+		},
+	}
+	app.Action = act
+	app.Run(os.Args)
 }
