@@ -3,7 +3,7 @@ package infra
 import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/mochisuna/ssh-mysql-sample/domain"
-	"github.com/mochisuna/ssh-mysql-sample/domainhub.com/mochisuna/ssh-mysql-sample/domain/repository"
+	"github.com/mochisuna/ssh-mysql-sample/domain/repository"
 	"github.com/mochisuna/ssh-mysql-sample/infra/mysql"
 )
 
