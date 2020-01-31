@@ -6,6 +6,8 @@ import (
 
 type StoreID int
 
+const StoreTableName = "stores"
+
 type Store struct {
 	ID        StoreID
 	UID       string

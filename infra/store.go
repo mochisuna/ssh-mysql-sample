@@ -3,13 +3,8 @@ package infra
 import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/mochisuna/ssh-mysql-sample/domain"
-	"github.com/mochisuna/ssh-mysql-sample/domain/repository"
+	"github.com/mochisuna/ssh-mysql-sample/domainhub.com/mochisuna/ssh-mysql-sample/domain/repository"
 	"github.com/mochisuna/ssh-mysql-sample/infra/mysql"
-)
-
-const (
-	// Table
-	storeTable = "stores"
 )
 
 type storeRepository struct {
@@ -33,7 +28,7 @@ func (r *storeRepository) Get(storeID domain.StoreID) (repository.Store, error) 
 	}
 	ret := repository.Store{}
 	err := sq.Select(columns...).
-		From("stores").
+		From(domain.StoreTableName).
 		Where(sq.Eq{
 			"stores.id": storeID,
 		}).
@@ -65,7 +60,7 @@ func (r *storeRepository) GetList() ([]repository.Store, error) {
 	}
 	ret := []repository.Store{}
 	rows, err := sq.Select(columns...).
-		From("stores").
+		From(domain.StoreTableName).
 		RunWith(r.DBClient.DB).
 		Query()
 	if err != nil {
