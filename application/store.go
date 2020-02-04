@@ -3,9 +3,10 @@ package application
 import (
 	"github.com/mochisuna/ssh-mysql-sample/domain"
 	"github.com/mochisuna/ssh-mysql-sample/domain/repository"
+	"github.com/mochisuna/ssh-mysql-sample/domain/service"
 )
 
-func NewStoreService(repo repository.StoreRepository) *storeService {
+func NewStoreService(repo repository.StoreRepository) service.StoreService {
 	return &storeService{
 		DBRepository: repo,
 	}

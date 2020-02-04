@@ -11,7 +11,7 @@ type storeRepository struct {
 	DBClient *mysql.Client
 }
 
-func NewStoreRepository(dbClient *mysql.Client) *storeRepository {
+func NewStoreRepository(dbClient *mysql.Client) repository.StoreRepository {
 	return &storeRepository{
 		DBClient: dbClient,
 	}
