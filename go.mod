@@ -5,7 +5,7 @@ require (
 	github.com/Masterminds/squirrel v1.2.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gocarina/gocsv v0.0.0-20181213162136-af1d9380204a
-	github.com/urfave/cli v1.22.2
+	github.com/urfave/cli v1.22.3
 	github.com/urfave/cli/v2 v2.1.1
 	golang.org/x/crypto v0.0.0-20190128193316-c7b33c32a30b
 )
